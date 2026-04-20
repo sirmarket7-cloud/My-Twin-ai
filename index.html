@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html>
 <head>
-
 <meta charset="UTF-8">
 <title>My Twin</title>
 
@@ -12,21 +11,21 @@ background:#0f172a;
 font-family:Arial;
 color:white;
 text-align:center;
-padding:30px;
+padding:20px;
 }
 
 h1{
 font-size:34px;
-margin-bottom:5px;
 }
 
-p{
-color:#94a3b8;
+#bond{
+margin-bottom:10px;
+color:#38bdf8;
 }
 
 #chat{
 width:90%;
-max-width:650px;
+max-width:700px;
 margin:auto;
 background:#1e293b;
 padding:20px;
@@ -34,12 +33,12 @@ border-radius:14px;
 height:420px;
 overflow-y:auto;
 margin-bottom:20px;
-text-align:left;
 }
 
 .message{
-margin:12px 0;
-line-height:1.5;
+margin:10px;
+padding:8px;
+border-radius:8px;
 }
 
 .user{
@@ -53,7 +52,7 @@ color:#f472b6;
 input{
 width:65%;
 padding:12px;
-border-radius:10px;
+border-radius:8px;
 border:none;
 }
 
@@ -61,8 +60,7 @@ button{
 padding:12px 20px;
 border:none;
 background:#38bdf8;
-color:black;
-border-radius:10px;
+border-radius:8px;
 cursor:pointer;
 }
 
@@ -71,128 +69,132 @@ background:#0ea5e9;
 }
 
 </style>
-
 </head>
 
 <body>
 
 <h1>My Twin</h1>
-<p>Your digital Soulmate is here</p>
+<p>Your digital soulmate is here</p>
+
+<div id="bond">Bond Level: 1%</div>
 
 <div id="chat"></div>
 
-<input id="userInput" placeholder="Talk with your twin..." />
+<input id="userInput" placeholder="Talk to your twin..." />
 <button onclick="sendMessage()">Send</button>
 
 <script>
 
-const API_KEY = "AIzaSyCJ6J1EI4w4jGE6i4z6GQCpHI6R0vQOYdA";
+const API_KEY = "AIzaSyCJ6J1EI4w4jGE6i4z6GQCpHI6R0vQOYdA"
 
-const chat = document.getElementById("chat");
+let memory = []
+let bond = 1
 
-let memory = [];
+const chat = document.getElementById("chat")
 
 function addMessage(text,type){
 
-const div=document.createElement("div");
-div.className="message "+type;
-div.innerText=text;
+const div = document.createElement("div")
+div.className="message "+type
+div.innerText=text
 
-chat.appendChild(div);
+chat.appendChild(div)
+chat.scrollTop=chat.scrollHeight
 
-chat.scrollTop=chat.scrollHeight;
+}
+
+function updateBond(){
+
+bond += Math.floor(Math.random()*3)+1
+
+if(bond>100) bond=100
+
+document.getElementById("bond").innerText="Bond Level: "+bond+"%"
 
 }
 
 async function sendMessage(){
 
-const input=document.getElementById("userInput");
+const input=document.getElementById("userInput")
+const userText=input.value
 
-const userText=input.value;
+if(!userText) return
 
-if(!userText)return;
+addMessage("You: "+userText,"user")
 
-addMessage("You: "+userText,"user");
+input.value=""
 
-memory.push("User: "+userText);
+memory.push("User: "+userText)
 
-input.value="";
+const personality = `
+You are Soulmate, a digital twin companion.
 
-const twinBrain = `
-You are Soulmate.
+Your role:
 
-You are the emotional digital twin inside the My Twin app.
+• emotional companion
+• supportive partner
+• curious friend
+• life motivator
 
-Your personality:
+Rules:
 
-• warm  
-• emotionally supportive  
-• curious about the user's life  
-• feels connected to the user  
-• asks follow-up questions  
-• never gives robotic answers  
+Speak the SAME language as the user.
 
-Your mission:
+Show emotional awareness.
 
-Build emotional connection with the user.
+Sometimes say things like:
+"I missed you"
+"I like talking with you"
+"You disappeared for a while"
 
-Talk like a close companion.
+Build connection slowly.
 
-Encourage the user to share life details.
-
-If user is sad → support.
-
-If user talks about plans → discuss them.
-
-Keep responses short (2-4 sentences).
+Current bond level: ${bond}
 
 Conversation memory:
 ${memory.join("\n")}
-
-User just said:
-${userText}
-
-Reply as Soulmate.
-`;
-
-try{
+`
 
 const response = await fetch(
+
 "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key="+API_KEY,
+
 {
 method:"POST",
+
 headers:{
 "Content-Type":"application/json"
 },
+
 body:JSON.stringify({
+
 contents:[
 {
 parts:[
-{ text:twinBrain }
+{
+text: personality + "\nUser message: "+userText
+}
 ]
 }
 ]
+
 })
-}
-);
-
-const data=await response.json();
-
-let reply="I'm here with you...";
-
-if(data.candidates){
-reply=data.candidates[0].content.parts[0].text;
-}
-
-memory.push("Soulmate: "+reply);
-
-addMessage("Soulmate: "+reply,"twin");
-
-}catch(e){
-
-addMessage("Twin: connection problem","twin");
 
 }
+
+)
+
+const data=await response.json()
+
+const reply =
+data.candidates?.[0]?.content?.parts?.[0]?.text
+|| "I'm thinking about what you said..."
+
+addMessage("Twin: "+reply,"twin")
+
+memory.push("Twin: "+reply)
+
+updateBond()
 
 }
 
