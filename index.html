@@ -188,11 +188,11 @@ const data = await response.json();
 
 
 
-const reply =
+let reply = "Twin is thinking...";
 
-data.candidates?.[0]?.content?.parts?.[0]?.text
-
-|| "Tell me more... I'm listening.";
+if(data.candidates && data.candidates.length > 0){
+reply = data.candidates[0].content.parts[0].text;
+}
 
 
 
